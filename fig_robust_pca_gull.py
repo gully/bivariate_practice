@@ -14,8 +14,17 @@ Ellipses show the 1- and 3-sigma contours. The solid lines correspond to the
 input distribution. The thin dotted lines show the nonrobust estimate, and the
 dashed lines show the robust estimate of the best-fit distribution parameters
 (see Section 3.5.3 for details).
+
+*ADDENDUM, December 19, 2013 by gully
+
+I edited the figure to demonstrate some features and try my hand at matplotlib.
+Specifically, I wanted to know more about the "robust estimate" and its limits.
+Exactly how much better is the robust compared to the nonrobust.
+
 """
-# Author: Jake VanderPlas
+# Author:Jake VanderPlas
+# Edited: Michael Gully-Santiago
+#         December 19, 2013
 # License: BSD
 #   The figure produced by this code is published in the textbook
 #   "Statistics, Data Mining, and Machine Learning in Astronomy" (2013)
