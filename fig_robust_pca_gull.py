@@ -75,12 +75,12 @@ X = bivariate_normal(mu, sigma1, sigma2, alpha, N)
 
 #------------------------------------------------------------
 # Create the figure showing the fits
-fig = plt.figure(figsize=(10, 5))
-fig.subplots_adjust(left=0.1, right=0.85, wspace=0.25,
-                    bottom=0.2, top=0.85)
+fig = plt.figure(figsize=(8, 8))
+fig.subplots_adjust(left=0.1, right=0.90, wspace=0.25,
+                    bottom=0.1, top=0.9, hspace=0.3)
 
 
-ax = fig.add_subplot(1, 2, 0)
+ax = fig.add_subplot(2, 2, 0)
 
 # add outliers distributed using a bivariate normal.
 
@@ -110,10 +110,12 @@ cont_frac = [0.0001, 0.001, 0.003, 0.006, 0.01, 0.03, 0.05, 0.07, 0.10,
 n_els = len(cont_frac)
 sigfit_rob = np.ones(n_els)
 sigfit_nonrob = np.ones(n_els)
-ax = fig.add_subplot(1, 2, 1)
+alpfit_rob = np.ones(n_els)
+alpfit_nonrob = np.ones(n_els)
+ax1 = fig.add_subplot(2, 2, 1)
+ax2 = fig.add_subplot(2, 2, 3)
 
 for i, f in enumerate(cont_frac):
-	print i
 	
 	# add outliers distributed using a bivariate normal.
 	X[:int(f * N)] = bivariate_normal((10, 10), 2, 4, 45 * np.pi / 180., int(f * N))
@@ -123,20 +125,34 @@ for i, f in enumerate(cont_frac):
 	# compute the non-robust statistics
 	(mu_nr, sigma1_nr, sigma2_nr, alpha_nr) = fit_bivariate_normal(x, y, robust=False)
 	sigfit_nonrob[i] = sigma1_nr
+	alpfit_nonrob[i] = alpha_nr
 	
 	# compute the robust statistics
 	(mu_r, sigma1_r, sigma2_r, alpha_r) = fit_bivariate_normal(x, y, robust=True)
 	sigfit_rob[i] = sigma1_r
+	alpfit_rob[i] = alpha_r
 
 # scatter the points
-print '-----'
-print cont_frac
-print '-----'
-print sigfit_rob
-ax.plot(cont_frac, sigfit_rob, '-k', label='Robust')
-ax.plot(cont_frac, sigfit_nonrob, ':k', label='Nonrobust')
+for i in range(n_els):
+  print "%g\t%g\t%g" %(cont_frac[i], sigfit_rob[i], alpfit_rob[i])
 
-ax.set_xlabel('Contamination Fraction')
-ax.set_ylabel('$\sigma$')
+ax1.plot(cont_frac, sigfit_rob, '-k', label='Robust')
+ax1.plot(cont_frac, sigfit_nonrob, ':k', label='Nonrobust')
+ax1.plot(cont_frac, sigma1*np.ones(n_els), '--r', label='Actual')
+
+ax1.set_xlabel('Contamination Fraction')
+ax1.set_ylabel('$\sigma$')
+leg = ax1.legend(loc='best', fancybox=True)
+leg.get_frame().set_alpha(0.5)
+
+ax2.plot(cont_frac, alpfit_rob, '-k', label='Robust')
+ax2.plot(cont_frac, alpfit_nonrob, ':k', label='Nonrobust')
+ax2.plot(cont_frac, alpha*np.ones(n_els), '--r', label='Actual')
+
+ax2.set_xlabel('Contamination Fraction')
+ax2.set_ylabel(r'$\alpha$')
+
+leg = ax2.legend(loc='best', fancybox=True)
+leg.get_frame().set_alpha(0.5)
 	
 plt.show()
