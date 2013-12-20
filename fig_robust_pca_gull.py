@@ -51,7 +51,7 @@ else:
 # result in an error if LaTeX is not installed on your system.  In that case,
 # you can set usetex to False.
 from astroML.plotting import setup_text_plots
-setup_text_plots(fontsize=8, usetex=True)
+setup_text_plots(fontsize=16, usetex=True)
 
 N = 1000
 
@@ -75,67 +75,68 @@ X = bivariate_normal(mu, sigma1, sigma2, alpha, N)
 
 #------------------------------------------------------------
 # Create the figure showing the fits
-fig = plt.figure(figsize=(5, 2.5))
-fig.subplots_adjust(left=0.1, right=0.95, wspace=0.05,
-                    bottom=0.15, top=0.95)
+fig = plt.figure(figsize=(10, 5))
+fig.subplots_adjust(left=0.1, right=0.85, wspace=0.25,
+                    bottom=0.2, top=0.85)
 
 
-# We'll create two figures, with two levels of contamination
-for i, f in enumerate([0.05, 0.15]):
-    ax = fig.add_subplot(1, 2, i + 1)
+ax = fig.add_subplot(1, 2, 0)
 
-    # add outliers distributed using a bivariate normal.
-    X[:int(f * N)] = bivariate_normal((10, 10), 2, 4,
-                                      45 * np.pi / 180., int(f * N))
-    x, y = X.T
+# add outliers distributed using a bivariate normal.
 
-    # compute the non-robust statistics
-    (mu_nr, sigma1_nr,
-     sigma2_nr, alpha_nr) = fit_bivariate_normal(x, y, robust=False)
+x, y = X.T
 
-    # compute the robust statistics
-    (mu_r, sigma1_r,
-     sigma2_r, alpha_r) = fit_bivariate_normal(x, y, robust=True)
+# scatter the points
+ax.scatter(x, y, s=2, lw=0, c='k', alpha=0.5)
 
-    # scatter the points
-    ax.scatter(x, y, s=2, lw=0, c='k', alpha=0.5)
+# Draw elipses showing the fits
+for Nsig in [1, 3]:
+	# True fit
+	E = Ellipse((10, 10), sigma1 * Nsig, sigma2 * Nsig, alpha_deg,
+				ec='k', fc='none')
+				
+	ax.add_patch(E)
+	
+ax.set_xlim(5.5, 14.5)
+ax.set_ylim(5.5, 14.5)
+ax.set_xlabel('$x$')
+ax.set_ylabel('$y$')
 
-    # Draw elipses showing the fits
-    for Nsig in [1, 3]:
-        # True fit
-        E = Ellipse((10, 10), sigma1 * Nsig, sigma2 * Nsig, alpha_deg,
-                    ec='k', fc='none')
-        ax.add_patch(E)
 
-        # Non-robust fit
-        E = Ellipse(mu_nr, sigma1_nr * Nsig, sigma2_nr * Nsig,
-                    (alpha_nr * 180. / np.pi),
-                    ec='k', fc='none', linestyle='dotted')
-        ax.add_patch(E)
+# We'll create ten levels of contamination, but not show each one.
+# Instead, we will show the fit sigma versus contamination level.
+cont_frac = [0.0001, 0.001, 0.003, 0.006, 0.01, 0.03, 0.05, 0.07, 0.10, 
+ 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7]
+n_els = len(cont_frac)
+sigfit_rob = np.ones(n_els)
+sigfit_nonrob = np.ones(n_els)
+ax = fig.add_subplot(1, 2, 1)
 
-        # Robust fit
-        E = Ellipse(mu_r, sigma1_r * Nsig, sigma2_r * Nsig,
-                    (alpha_r * 180. / np.pi),
-                    ec='k', fc='none', linestyle='dashed')
-        ax.add_patch(E)
+for i, f in enumerate(cont_frac):
+	print i
+	
+	# add outliers distributed using a bivariate normal.
+	X[:int(f * N)] = bivariate_normal((10, 10), 2, 4, 45 * np.pi / 180., int(f * N))
+	
+	x, y = X.T
+	
+	# compute the non-robust statistics
+	(mu_nr, sigma1_nr, sigma2_nr, alpha_nr) = fit_bivariate_normal(x, y, robust=False)
+	sigfit_nonrob[i] = sigma1_nr
+	
+	# compute the robust statistics
+	(mu_r, sigma1_r, sigma2_r, alpha_r) = fit_bivariate_normal(x, y, robust=True)
+	sigfit_rob[i] = sigma1_r
 
-    ax.text(0.04, 0.96, '%i%s outliers' % (f * 100, pct),
-            ha='left', va='top', transform=ax.transAxes)
+# scatter the points
+print '-----'
+print cont_frac
+print '-----'
+print sigfit_rob
+ax.plot(cont_frac, sigfit_rob, '-k', label='Robust')
+ax.plot(cont_frac, sigfit_nonrob, ':k', label='Nonrobust')
 
-    ax.set_xlim(5.5, 14.5)
-    ax.set_ylim(5.5, 14.5)
-    ax.set_xlabel('$x$')
-
-    # This is a bit of a hack:
-    # We'll draw some lines off the picture to make our legend look better
-    ax.plot([0], [0], '-k', label='Input')
-    ax.plot([0], [0], ':k', label='Fit')
-    ax.plot([0], [0], '--k', label='Robust Fit')
-    ax.legend(loc='lower right')
-
-    if i == 0:
-        ax.set_ylabel('$y$')
-    else:
-        ax.yaxis.set_major_formatter(plt.NullFormatter())
-
+ax.set_xlabel('Contamination Fraction')
+ax.set_ylabel('$\sigma$')
+	
 plt.show()
