@@ -59,8 +59,9 @@ N = 1000
 sigma1 = 2.0
 sigma2 = 0.2
 mu = [10, 10]
+# it's easier to visualize the x and y sigmas with alpha=0.0
 alpha_deg = 0.0 #used to be 45 deg...
-# it's easier to visualize the x and y sigmas this way
+
 alpha = alpha_deg * np.pi / 180
 
 #------------------------------------------------------------
