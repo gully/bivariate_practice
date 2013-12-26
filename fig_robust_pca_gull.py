@@ -50,15 +50,16 @@ else:
 # Note that with usetex=True, fonts are rendered with LaTeX.  This may
 # result in an error if LaTeX is not installed on your system.  In that case,
 # you can set usetex to False.
-from astroML.plotting import setup_text_plots
-setup_text_plots(fontsize=16, usetex=True)
+
+# from astroML.plotting import setup_text_plots
+# setup_text_plots(fontsize=16, usetex=True)
 
 N = 1000
 
 sigma1 = 2.0
-sigma2 = 1.0
+sigma2 = 0.5
 mu = [10, 10]
-alpha_deg = 45.0
+alpha_deg = 0.0 #used to be 45 deg...
 alpha = alpha_deg * np.pi / 180
 
 #------------------------------------------------------------
@@ -110,10 +111,13 @@ cont_frac = [0.0001, 0.001, 0.003, 0.006, 0.01, 0.03, 0.05, 0.07, 0.10,
 n_els = len(cont_frac)
 sigfit_rob = np.ones(n_els)
 sigfit_nonrob = np.ones(n_els)
+sigfit2_rob = np.ones(n_els)
+sigfit2_nonrob = np.ones(n_els)
 alpfit_rob = np.ones(n_els)
 alpfit_nonrob = np.ones(n_els)
 ax1 = fig.add_subplot(2, 2, 1)
 ax2 = fig.add_subplot(2, 2, 3)
+ax3 = fig.add_subplot(2, 2, 2)
 
 for i, f in enumerate(cont_frac):
 	
@@ -125,11 +129,13 @@ for i, f in enumerate(cont_frac):
 	# compute the non-robust statistics
 	(mu_nr, sigma1_nr, sigma2_nr, alpha_nr) = fit_bivariate_normal(x, y, robust=False)
 	sigfit_nonrob[i] = sigma1_nr
+	sigfit2_nonrob[i] = sigma2_nr	
 	alpfit_nonrob[i] = alpha_nr
 	
 	# compute the robust statistics
 	(mu_r, sigma1_r, sigma2_r, alpha_r) = fit_bivariate_normal(x, y, robust=True)
 	sigfit_rob[i] = sigma1_r
+	sigfit2_rob[i] = sigma2_r
 	alpfit_rob[i] = alpha_r
 
 # scatter the points
@@ -138,10 +144,18 @@ for i in range(n_els):
 
 ax1.plot(cont_frac, sigfit_rob, '-k', label='Robust')
 ax1.plot(cont_frac, sigfit_nonrob, ':k', label='Nonrobust')
+ax3.plot(cont_frac, sigfit2_rob, '-b')
+ax3.plot(cont_frac, sigfit2_nonrob,':b')
 ax1.plot(cont_frac, sigma1*np.ones(n_els), '--r', label='Actual')
+ax3.plot(cont_frac, sigma2*np.ones(n_els), '--g')
+
+
 
 ax1.set_xlabel('Contamination Fraction')
-ax1.set_ylabel('$\sigma$')
+ax1.set_ylabel('$\sigma_x$')
+ax3.set_xlabel('Contamination Fraction')
+ax3.set_ylabel('$\sigma_y$')
+
 leg = ax1.legend(loc='best', fancybox=True)
 leg.get_frame().set_alpha(0.5)
 
